@@ -1,0 +1,145 @@
+:root {
+  --green: #1a7f4e;
+  --red: #c23b3b;
+  --amber: #b8860b;
+  --ink: #1a1a1a;
+  --paper: #faf8f4;
+  --line: #e4ddd0;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.brand {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #6b6455;
+  margin: 0;
+}
+.brand .dot { color: var(--green); }
+
+.card {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.hidden { display: none !important; }
+
+.lede {
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cta {
+  width: 100%;
+  padding: 18px 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+}
+.cta:active { transform: scale(0.98); }
+
+.secondary {
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.link-btn {
+  border: none;
+  background: none;
+  color: #6b6455;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.fineprint {
+  font-size: 0.8rem;
+  color: #9a927e;
+  margin: 0;
+}
+
+.badge {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.badge.yes { color: var(--green); }
+.badge.no { color: var(--red); }
+.badge.not-sure { color: var(--amber); }
+
+.reason {
+  font-size: 1rem;
+  color: #4a4636;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.next {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  border-top-color: var(--ink);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+footer {
+  font-size: 0.75rem;
+  color: #a39c8b;
+  text-align: center;
+  line-height: 1.5;
+}
+footer a { color: inherit; }

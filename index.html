@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Can I Park Here?</title>
+  <meta name="description" content="Point your phone at the curb. Get a yes or no." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="brand">canipark<span class="dot">.</span>here</h1>
+
+    <section id="state-idle" class="card">
+      <p class="lede">Stand next to your car. We'll check the nearest sign.</p>
+      <button id="check-btn" class="cta">Can I park here?</button>
+      <p class="fineprint">Montréal only, for now. Uses your location once — nothing is stored.</p>
+    </section>
+
+    <section id="state-loading" class="card hidden">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="lede">Checking the signs near you…</p>
+    </section>
+
+    <section id="state-result" class="card hidden">
+      <div id="result-badge" class="badge"></div>
+      <p id="result-reason" class="reason"></p>
+      <p id="result-next" class="next"></p>
+      <button id="side-toggle" class="link-btn hidden">Wrong side of the street?</button>
+      <button id="again-btn" class="secondary">Check again</button>
+    </section>
+
+    <section id="state-error" class="card hidden">
+      <p class="lede" id="error-message">Something went wrong.</p>
+      <button id="retry-btn" class="secondary">Try again</button>
+    </section>
+
+    <footer>
+      Data: <a href="https://donnees.montreal.ca/dataset/stationnement-sur-rue-signalisation-courant" target="_blank" rel="noopener">Ville de Montréal, open data</a>,
+      updated daily. Signage in the field always wins over this app.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
