@@ -111,6 +111,7 @@ const STATUS_ACCENT = { YES: "#1a7f4e", NO: "#c23b3b", NOT_SURE: "#b8860b" };
 const DAY_LABEL = { mon: "LUN", tue: "MAR", wed: "MER", thu: "JEU", fri: "VEN", sat: "SAM", sun: "DIM" };
 const MONTH_LABEL = ["", "JAN", "FÉV", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
 const CATEGORY_TAG = {
+  disabled_loading_zone: "HANDICAPÉS DÉBARCADÈRE",
   emergency: "AMBULANCE", police_only: "POLICE", fire_lane: "INCENDIE",
   taxi_only: "TAXI", bus_only: "AUTOBUS", disabled_only: "HANDICAP",
   diplomatic: "DIPLOMATIQUE", loading_zone: "DÉBARCADÈRE", permit_zone: "VIGNETTE",

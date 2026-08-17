@@ -106,9 +106,11 @@ function formatDelta(minutesFromNow, when) {
 
 // Specific reason text when the sign names who it's actually for. Falls
 // back to the generic restriction text below when no category matched.
-// See the CATEGORY_KEYWORDS comment in data/parse_rtp.py -- unverified
-// against a full real-data sample as of this writing.
+// bus_only and disabled_loading_zone are confirmed against real city data
+// (2026-08-17); the rest are educated guesses pending confirmation --
+// see the CATEGORY_KEYWORDS comment in data/parse_rtp.py.
 const CATEGORY_TEXT = {
+  disabled_loading_zone: "Accessible-parking permit holders only right now -- pick-up/drop-off zone (handicap\u00e9s / d\u00e9barcad\u00e8re).",
   emergency: "Reserved for emergency vehicles (ambulance) right now.",
   police_only: "Reserved for police vehicles right now.",
   fire_lane: "Fire lane / hydrant access -- no stopping right now.",

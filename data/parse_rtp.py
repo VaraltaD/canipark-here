@@ -69,11 +69,15 @@ RESTRICTION_KEYWORDS = [
 # no_parking/no_stopping classification above -- e.g. "\P TAXI" is still
 # restriction=no_parking (blocks regular cars), but category=taxi_only
 # lets the reason text say "taxi stand" instead of just "no parking".
-# UNVERIFIED against real samples beyond the ones you've already checked --
-# these are common Quebec sign phrasings, not confirmed city vocabulary.
-# Run `parse_rtp.py --sample 100` (or more) and grep for these words in
-# the real DESCRIPTION_RPA text to confirm/correct before fully trusting.
+#
+# Confirmed against real city data (2026-08-17, ~100-row sample):
+#   bus_only            -- "\A RESERVE AUTOBUS", "\P AUX AUTOBUS"
+#   disabled_loading_zone -- "\P EXCEPTE HANDICAPES DEBARCADERE SEULEMENT"
+# NOT YET CONFIRMED (no examples seen in the sample so far -- may not
+# exist in this dataset, or may just not have appeared in ~100 rows):
+#   emergency, police_only, fire_lane, taxi_only, diplomatic
 CATEGORY_KEYWORDS = [
+    ("disabled_loading_zone", [r"HANDICAP[ÉE]?S?.*D[ÉE]BARCAD[ÈE]RE", r"D[ÉE]BARCAD[ÈE]RE.*HANDICAP"]),
     ("emergency", [r"AMBULANCE", r"URGENCE"]),
     ("police_only", [r"POLICE"]),
     ("fire_lane", [r"INCENDIE", r"BORNE[\s-]?FONTAINE", r"HYDRANT"]),
@@ -196,6 +200,15 @@ def parse_time_rule(rpa_text: str) -> dict:
     windows = parse_time_windows(text)
     exceptions = parse_exceptions(text)
     season = parse_season(text)
+
+    # A sign with a recognized restriction symbol (\P or \A) but no day/time
+    # text at all -- e.g. "\A RESERVE AUTOBUS" -- means the restriction
+    # applies at all times, the same as an explicit "EN TOUT TEMPS". Only
+    # apply this when the restriction itself was confidently read; don't
+    # guess "always" for text we didn't understand in the first place.
+    if restriction != "unknown" and not days and not windows and not season:
+        days = DAY_ORDER.copy()
+        windows = [{"start": "00:00", "end": "00:00"}]
 
     confidence = "high"
     if restriction == "unknown":
