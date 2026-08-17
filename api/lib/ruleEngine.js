@@ -11,14 +11,17 @@ function nowInMontreal(at = new Date()) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    month: "2-digit",
+    day: "2-digit",
   }).formatToParts(at);
 
   const get = (type) => parts.find((p) => p.type === type)?.value;
-  const weekdayShort = get("weekday").toLowerCase().slice(0, 3); // "mon", "tue", ...
-  const day = weekdayShort;
+  const day = get("weekday").toLowerCase().slice(0, 3); // "mon", "tue", ...
   const hour = Number(get("hour"));
   const minute = Number(get("minute"));
-  return { day, minutes: hour * 60 + minute };
+  const month = Number(get("month"));
+  const date = Number(get("day"));
+  return { day, minutes: hour * 60 + minute, month, date };
 }
 
 function timeToMinutes(hhmm) {
@@ -35,23 +38,36 @@ function withinWindow(nowMinutes, startHHMM, endHHMM) {
   return nowMinutes >= start || nowMinutes < end; // crosses midnight
 }
 
+/** Is today's month/day inside a seasonal range, e.g. April 1 - Dec 1. */
+function withinSeason(when, season) {
+  if (!season) return true;
+  const cur = when.month * 100 + when.date;
+  const start = season.startMonth * 100 + season.startDay;
+  const end = season.endMonth * 100 + season.endDay;
+  if (start <= end) return cur >= start && cur <= end;
+  return cur >= start || cur <= end; // wraps across the new year
+}
+
 /**
  * Is this rule "active" (i.e. its restriction currently applies) right now?
- * A rule with no days/windows at all (parsed nothing structured) is never
- * considered active here -- it's surfaced separately as low-confidence.
  */
 function isRuleActiveNow(rule, when) {
+  if (!withinSeason(when, rule.season)) return false;
   if (rule.exceptions?.includes(when.day)) return false;
   if (rule.days?.length && !rule.days.includes(when.day)) return false;
   if (!rule.windows?.length) {
-    // No time windows parsed: if it has a day match (or applies every day
-    // implicitly) treat it as active all day, e.g. permanent permit zones.
     return rule.days?.length > 0;
   }
   return rule.windows.some((w) => withinWindow(when.minutes, w.start, w.end));
 }
 
-/** Next minute-of-week (0-10079) at which `rule`'s active-state flips. */
+/**
+ * Next minute-of-week (0-10079) at which `rule`'s active-state flips.
+ * Note: this doesn't account for seasonal start/end dates -- if a rule is
+ * currently out of season, this still reports the next weekly time it
+ * would flip *if* it were in season. Good enough for "what time today",
+ * not fully correct right at a season boundary.
+ */
 function nextTransition(rule, when) {
   const nowDow = DAY_ORDER.indexOf(when.day);
   const nowAbsolute = nowDow * 1440 + when.minutes;
