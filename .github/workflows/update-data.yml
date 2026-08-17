@@ -24,6 +24,9 @@ jobs:
       - name: Fetch latest city data
         run: python data/fetch.py
 
+      - name: Show sample rows
+        run: python data/parse_rtp.py --sample 6
+        
       - name: Rebuild signs.json
         run: python data/parse_rtp.py
 
