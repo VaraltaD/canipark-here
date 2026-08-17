@@ -104,7 +104,26 @@ function formatDelta(minutesFromNow, when) {
   return { time: label, dayLabel: DAY_ORDER[targetDow] };
 }
 
+// Specific reason text when the sign names who it's actually for. Falls
+// back to the generic restriction text below when no category matched.
+// See the CATEGORY_KEYWORDS comment in data/parse_rtp.py -- unverified
+// against a full real-data sample as of this writing.
+const CATEGORY_TEXT = {
+  emergency: "Reserved for emergency vehicles (ambulance) right now.",
+  police_only: "Reserved for police vehicles right now.",
+  fire_lane: "Fire lane / hydrant access -- no stopping right now.",
+  taxi_only: "Taxi stand -- reserved for taxis right now.",
+  bus_only: "Bus zone -- reserved for buses right now.",
+  disabled_only: "Reserved for accessible-parking permit holders right now.",
+  diplomatic: "Reserved for diplomatic vehicles right now.",
+  loading_zone: "Loading zone (d\u00e9barcad\u00e8re) -- drop-off/pick-up only, no parking, right now.",
+  permit_zone: "Permit-holders only (vignette / SRRR) -- a residential sticker is required right now.",
+};
+
 function describeRestriction(rule) {
+  if (rule.category && CATEGORY_TEXT[rule.category]) {
+    return CATEGORY_TEXT[rule.category];
+  }
   switch (rule.restriction) {
     case "no_stopping":
       return "No stopping in effect right now (stricter than no parking -- moving your car isn't enough, it can't be left standing at all).";

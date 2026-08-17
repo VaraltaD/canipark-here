@@ -110,6 +110,11 @@ function buildLocationLine(data) {
 const STATUS_ACCENT = { YES: "#1a7f4e", NO: "#c23b3b", NOT_SURE: "#b8860b" };
 const DAY_LABEL = { mon: "LUN", tue: "MAR", wed: "MER", thu: "JEU", fri: "VEN", sat: "SAM", sun: "DIM" };
 const MONTH_LABEL = ["", "JAN", "FÉV", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
+const CATEGORY_TAG = {
+  emergency: "AMBULANCE", police_only: "POLICE", fire_lane: "INCENDIE",
+  taxi_only: "TAXI", bus_only: "AUTOBUS", disabled_only: "HANDICAP",
+  diplomatic: "DIPLOMATIQUE", loading_zone: "DÉBARCADÈRE", permit_zone: "VIGNETTE",
+};
 
 function esc(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -144,15 +149,16 @@ function seasonText(season) {
 function signSVG(rule, status) {
   const accent = STATUS_ACCENT[status] || "#6b6455";
   const symbol = rule.restriction === "no_stopping" ? "A" : rule.restriction === "no_parking" ? "P" : "?";
-  const lines = [timeText(rule.windows), dayText(rule.days), seasonText(rule.season)].filter(Boolean);
+  const categoryTag = CATEGORY_TAG[rule.category] || null;
+  const lines = [categoryTag, timeText(rule.windows), dayText(rule.days), seasonText(rule.season)].filter(Boolean);
 
   const lineSvg = lines
     .map((line, i) => `<text x="100" y="${172 + i * 20}" text-anchor="middle" font-size="14" font-family="Arial, sans-serif" font-weight="${i === 0 ? 700 : 400}" fill="#1a1a1a">${esc(line)}</text>`)
     .join("");
 
   return `
-<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic of the decoded sign">
-  <rect x="4" y="4" width="192" height="232" rx="14" fill="#ffffff" stroke="${accent}" stroke-width="3"/>
+<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic of the decoded sign">
+  <rect x="4" y="4" width="192" height="252" rx="14" fill="#ffffff" stroke="${accent}" stroke-width="3"/>
   <circle cx="100" cy="76" r="46" fill="none" stroke="#c23b3b" stroke-width="6"/>
   <line x1="66" y1="42" x2="134" y2="110" stroke="#c23b3b" stroke-width="6"/>
   <text x="100" y="90" text-anchor="middle" font-size="52" font-family="Arial, sans-serif" font-weight="800" fill="#1a1a1a">${symbol}</text>

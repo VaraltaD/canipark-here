@@ -65,6 +65,37 @@ RESTRICTION_KEYWORDS = [
     ]),
 ]
 
+# Who/what a restriction is actually for, layered on top of the base
+# no_parking/no_stopping classification above -- e.g. "\P TAXI" is still
+# restriction=no_parking (blocks regular cars), but category=taxi_only
+# lets the reason text say "taxi stand" instead of just "no parking".
+# UNVERIFIED against real samples beyond the ones you've already checked --
+# these are common Quebec sign phrasings, not confirmed city vocabulary.
+# Run `parse_rtp.py --sample 100` (or more) and grep for these words in
+# the real DESCRIPTION_RPA text to confirm/correct before fully trusting.
+CATEGORY_KEYWORDS = [
+    ("emergency", [r"AMBULANCE", r"URGENCE"]),
+    ("police_only", [r"POLICE"]),
+    ("fire_lane", [r"INCENDIE", r"BORNE[\s-]?FONTAINE", r"HYDRANT"]),
+    ("taxi_only", [r"TAXI"]),
+    ("bus_only", [r"AUTOBUS", r"\bBUS\b"]),
+    ("disabled_only", [r"HANDICAP"]),
+    ("diplomatic", [r"DIPLOMATIQUE"]),
+    ("loading_zone", [r"D[ÉE]BARCAD[ÈE]RE", r"LIVRAISON"]),
+    ("permit_zone", [r"VIGNETTE", r"SRRR", r"R[ÉE]SERV[ÉE]", r"PERMIS\s*REQUIS"]),
+]
+
+
+def classify_category(text: str):
+    """Returns a specific purpose label (taxi_only, police_only, etc.) if
+    the text mentions one, or None if it's just a plain restriction."""
+    t = (text or "").upper()
+    for category, patterns in CATEGORY_KEYWORDS:
+        for pat in patterns:
+            if re.search(pat, t):
+                return category
+    return None
+
 TIME_RE = re.compile(r"(\d{1,2})\s*H\s*(\d{2})?")
 DAY_TOKEN_RE = re.compile(
     r"\b(" + "|".join(sorted(DAY_MAP.keys(), key=len, reverse=True)) + r")\b"
@@ -160,6 +191,7 @@ def parse_season(text: str):
 def parse_time_rule(rpa_text: str) -> dict:
     text = rpa_text or ""
     restriction = classify_restriction(text)
+    category = classify_category(text)
     days = parse_days(text)
     windows = parse_time_windows(text)
     exceptions = parse_exceptions(text)
@@ -173,6 +205,7 @@ def parse_time_rule(rpa_text: str) -> dict:
 
     return {
         "restriction": restriction,
+        "category": category,
         "days": days,
         "windows": windows,
         "exceptions": exceptions,
