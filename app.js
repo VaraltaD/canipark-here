@@ -12,6 +12,8 @@ const els = {
   badge: document.getElementById("result-badge"),
   reason: document.getElementById("result-reason"),
   next: document.getElementById("result-next"),
+  location: document.getElementById("result-location"),
+  sign: document.getElementById("result-sign"),
   errorMessage: document.getElementById("error-message"),
 };
 
@@ -82,7 +84,80 @@ function render(data) {
     els.next.textContent = "";
   }
 
+  els.location.textContent = buildLocationLine(data);
+  els.sign.innerHTML = data.governingSign ? signSVG(data.governingSign.rule, data.status) : "";
+  els.sign.classList.toggle("hidden", !data.governingSign);
+
   showOnly(els.result);
+}
+
+function buildLocationLine(data) {
+  const sign = data.governingSign;
+  if (!sign) return "";
+  const parts = [];
+  if (data.address) parts.push(`Near ${data.address}`);
+  if (data.direction && sign.distanceM != null) {
+    parts.push(`${Math.round(sign.distanceM)}m to your ${data.direction}`);
+  }
+  return parts.join(" — ");
+}
+
+// --- Schematic sign rendering -------------------------------------------
+// Not a photo of the real sign (the city's photo archive is old and
+// incomplete) -- this redraws what the API actually decoded, so it's a
+// direct visual check against the physical sign in front of you.
+
+const STATUS_ACCENT = { YES: "#1a7f4e", NO: "#c23b3b", NOT_SURE: "#b8860b" };
+const DAY_LABEL = { mon: "LUN", tue: "MAR", wed: "MER", thu: "JEU", fri: "VEN", sat: "SAM", sun: "DIM" };
+const MONTH_LABEL = ["", "JAN", "FÉV", "MARS", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
+
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+function dayText(days) {
+  if (!days || !days.length) return "";
+  if (days.length === 7) return "TOUS LES JOURS";
+  const order = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+  const sorted = [...days].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  if (sorted.length === 1) return DAY_LABEL[sorted[0]];
+  const isConsecutive = sorted.every((d, i) => i === 0 || order.indexOf(d) === order.indexOf(sorted[i - 1]) + 1);
+  if (isConsecutive) return `${DAY_LABEL[sorted[0]]}-${DAY_LABEL[sorted[sorted.length - 1]]}`;
+  return sorted.map((d) => DAY_LABEL[d]).join(" ");
+}
+
+function timeText(windows) {
+  if (!windows || !windows.length) return "";
+  if (windows.length === 1 && windows[0].start === "00:00" && windows[0].end === "00:00") {
+    return "EN TOUT TEMPS";
+  }
+  return windows.map((w) => `${w.start}-${w.end}`).join(" ET ");
+}
+
+function seasonText(season) {
+  if (!season) return "";
+  return `${season.startDay} ${MONTH_LABEL[season.startMonth]} AU ${season.endDay} ${MONTH_LABEL[season.endMonth]}`;
+}
+
+function signSVG(rule, status) {
+  const accent = STATUS_ACCENT[status] || "#6b6455";
+  const symbol = rule.restriction === "no_stopping" ? "A" : rule.restriction === "no_parking" ? "P" : "?";
+  const lines = [timeText(rule.windows), dayText(rule.days), seasonText(rule.season)].filter(Boolean);
+
+  const lineSvg = lines
+    .map((line, i) => `<text x="100" y="${172 + i * 20}" text-anchor="middle" font-size="14" font-family="Arial, sans-serif" font-weight="${i === 0 ? 700 : 400}" fill="#1a1a1a">${esc(line)}</text>`)
+    .join("");
+
+  return `
+<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic of the decoded sign">
+  <rect x="4" y="4" width="192" height="232" rx="14" fill="#ffffff" stroke="${accent}" stroke-width="3"/>
+  <circle cx="100" cy="76" r="46" fill="none" stroke="#c23b3b" stroke-width="6"/>
+  <line x1="66" y1="42" x2="134" y2="110" stroke="#c23b3b" stroke-width="6"/>
+  <text x="100" y="90" text-anchor="middle" font-size="52" font-family="Arial, sans-serif" font-weight="800" fill="#1a1a1a">${symbol}</text>
+  ${lineSvg}
+</svg>`.trim();
 }
 
 els.checkBtn.addEventListener("click", checkParking);

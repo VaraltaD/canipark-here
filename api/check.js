@@ -1,7 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { findNearestSigns } = require("./lib/nearestSigns");
+const { findNearestSigns, bearingLabel } = require("./lib/nearestSigns");
 const { evaluate } = require("./lib/ruleEngine");
+const { reverseGeocode } = require("./lib/geocode");
 
 let signsCache = null;
 function loadSigns() {
@@ -11,7 +12,7 @@ function loadSigns() {
   return signsCache;
 }
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
@@ -33,8 +34,18 @@ module.exports = (req, res) => {
   const nearby = findNearestSigns(signs, lat, lng, { radiusM, maxResults: 8 });
   const result = evaluate(nearby, new Date());
 
+  let address = null;
+  let direction = null;
+  if (result.governingSign) {
+    const sign = result.governingSign;
+    direction = bearingLabel(lat, lng, sign.lat, sign.lng);
+    address = await reverseGeocode(sign.lat, sign.lng);
+  }
+
   res.status(200).json({
     query: { lat, lng, radiusM },
     ...result,
+    address,
+    direction,
   });
 };

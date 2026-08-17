@@ -126,6 +126,22 @@ body {
   margin: 0;
 }
 
+.location {
+  font-size: 0.85rem;
+  color: #6b6455;
+  margin: 0;
+}
+
+.sign-schematic {
+  width: 140px;
+  margin: 4px 0;
+}
+.sign-schematic svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .spinner {
   width: 32px;
   height: 32px;
